@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polygon Names by Number of Sides</title>
+<style>
+  :root {
+    --teal: #0d9488;
+    --teal-dark: #0f766e;
+    --orange: #f4a261;
+    --orange-dark: #e76f51;
+    --peach: #f8d5a3;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --success: #10b981;
+    --shadow: 0 10px 25px -5px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(145deg, #f0fdfa 0%, #f8fafc 50%, #fff7ed 100%);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  header {
+    background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+    color: white;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+
+  header h1 {
+    font-size: clamp(1.6rem, 4.5vw, 2.4rem);
+    font-weight: 800;
+    letter-spacing: -0.4px;
+  }
+
+  header p {
+    opacity: 0.9;
+    margin-top: 0.3rem;
+    font-size: 1.05rem;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .intro {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 1.4rem 1.6rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.8rem;
+    border-left: 5px solid var(--teal);
+    font-size: 1.08rem;
+  }
+
+  .section-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--teal-dark);
+    margin: 1.8rem 0 1rem;
+  }
+
+  .shapes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+  }
+
+  .shape-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 1.2rem 0.9rem;
+    box-shadow: var(--shadow);
+    border: 2px solid transparent;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .shape-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--orange);
+    box-shadow: 0 16px 25px -5px rgb(231 111 81 / 0.18);
+  }
+
+  .shape-card.active {
+    border-color: var(--teal);
+    background: linear-gradient(to bottom, #f0fdfa, white);
+  }
+
+  .shape-svg {
+    width: 110px;
+    height: 110px;
+    margin: 0 auto 0.6rem;
+  }
+
+  .shape-card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 0.15rem;
+    color: var(--text);
+  }
+
+  .shape-card .sides {
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .info-panel {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 1.4rem 1.5rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+    display: none;
+    border-left: 5px solid var(--orange);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .info-panel.show { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .info-panel h3 {
+    color: var(--teal-dark);
+    margin-bottom: 0.4rem;
+    font-size: 1.3rem;
+  }
+
+  .quiz-card {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 1.6rem;
+    box-shadow: var(--shadow);
+  }
+
+  .quiz-question {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 1.2rem;
+  }
+
+  .options {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .option-btn {
+    background: #f1f5f9;
+    border: 2px solid #e2e8f0;
+    padding: 0.85rem 1.1rem;
+    border-radius: 11px;
+    font-size: 1rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .option-btn:hover {
+    border-color: var(--teal);
+    background: #f0fdfa;
+  }
+
+  .option-btn.correct {
+    background: #d1fae5;
+    border-color: var(--success);
+    color: #065f46;
+  }
+
+  .option-btn.wrong {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #991b1b;
+  }
+
+  .feedback {
+    margin-top: 1rem;
+    padding: 0.8rem 1.1rem;
+    border-radius: 11px;
+    font-weight: 500;
+    display: none;
+  }
+
+  .feedback.show { display: block; }
+  .feedback.success { background: #d1fae5; color: #065f46; }
+  .feedback.error { background: #fee2e2; color: #991b1b; }
+
+  .next-btn {
+    margin-top: 1.2rem;
+    background: var(--teal);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.6rem;
+    border-radius: 11px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: none;
+  }
+
+  .next-btn:hover { background: var(--teal-dark); }
+  .next-btn.show { display: inline-block; }
+
+  .tip {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-top: 2.5rem;
+  }
+
+  @media (max-width: 500px) {
+    .shape-svg { width: 95px; height: 95px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Polygon Names by Number of Sides</h1>
+  <p>Interactive guide • Year 7–8 Mathematics</p>
+</header>
+
+<div class="container">
+
+  <div class="intro">
+    Polygons are named according to how many sides they have. Click any shape below to learn its name and see more details.
+  </div>
+
+  <h2 class="section-title">Click a shape to explore</h2>
+
+  <div class="shapes-grid" id="shapesGrid">
+    <!-- Shapes will be generated by JS -->
+  </div>
+
+  <div class="info-panel" id="infoPanel">
+    <h3 id="infoTitle">Shape Name</h3>
+    <p id="infoDesc"></p>
+  </div>
+
+  <h2 class="section-title">Quick Check</h2>
+  <div class="quiz-card">
+    <div class="quiz-question" id="quizQuestion">Loading...</div>
+    <div class="options" id="quizOptions"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn">Next Question →</button>
+  </div>
+
+  <div class="tip">
+    Tip: A polygon with <strong>n</strong> sides is also called an <strong>n-gon</strong>.
+  </div>
+</div>
+
+<script>
+  const polygons = [
+    {
+      name: "Triangle",
+      sides: 3,
+      points: "55,12 100,95 10,95",
+      desc: "A triangle has 3 sides and 3 vertices. It is the simplest polygon. The sum of its interior angles is always 180°."
+    },
+    {
+      name: "Quadrilateral",
+      sides: 4,
+      points: "20,25 95,15 105,85 15,95",
+      desc: "A quadrilateral has 4 sides and 4 vertices. Common examples include squares, rectangles, parallelograms, trapeziums and rhombuses."
+    },
+    {
+      name: "Pentagon",
+      sides: 5,
+      points: "55,10 100,40 85,95 25,95 10,40",
+      desc: "A pentagon has 5 sides and 5 vertices. A regular pentagon has equal sides and equal angles."
+    },
+    {
+      name: "Hexagon",
+      sides: 6,
+      points: "55,10 95,30 95,75 55,95 15,75 15,30",
+      desc: "A hexagon has 6 sides and 6 vertices. Regular hexagons tessellate perfectly (they fit together with no gaps), which is why bees use this shape for honeycombs."
+    },
+    {
+      name: "Heptagon",
+      sides: 7,
+      points: "55,8 92,25 105,60 85,95 25,95 5,60 18,25",
+      desc: "A heptagon (also called a septagon) has 7 sides and 7 vertices."
+    },
+    {
+      name: "Octagon",
+      sides: 8,
+      points: "40,10 75,10 100,35 100,70 75,95 40,95 15,70 15,35",
+      desc: "An octagon has 8 sides and 8 vertices. Stop signs are regular octagons."
+    },
+    {
+      name: "Nonagon",
+      sides: 9,
+      points: "55,8 85,15 105,40 100,70 80,95 30,95 10,70 5,40 25,15",
+      desc: "A nonagon (also called an enneagon) has 9 sides and 9 vertices."
+    },
+    {
+      name: "Decagon",
+      sides: 10,
+      points: "55,8 80,12 100,30 105,55 95,80 70,95 40,95 15,80 5,55 10,30 30,12",
+      desc: "A decagon has 10 sides and 10 vertices."
+    }
+  ];
+
+  const grid = document.getElementById('shapesGrid');
+  const infoPanel = document.getElementById('infoPanel');
+  const infoTitle = document.getElementById('infoTitle');
+  const infoDesc = document.getElementById('infoDesc');
+
+  polygons.forEach((p, index) => {
+    const card = document.createElement('div');
+    card.className = 'shape-card';
+    card.dataset.index = index;
+
+    card.innerHTML = `
+      <svg class="shape-svg" viewBox="0 0 110 110">
+        <polygon points="${p.points}" fill="#f8d5a3" stroke="#c2410c" stroke-width="2.8"/>
+      </svg>
+      <h3>${p.name}</h3>
+      <div class="sides">${p.sides} sides</div>
+    `;
+
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.shape-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+
+      infoTitle.textContent = `${p.name} — ${p.sides} sides`;
+      infoDesc.textContent = p.desc;
+      infoPanel.classList.add('show');
+      infoPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    grid.appendChild(card);
+  });
+
+  // Quiz
+  const questions = [
+    {
+      q: "How many sides does a hexagon have?",
+      options: ["5", "6", "7", "8"],
+      correct: 1
+    },
+    {
+      q: "What is the name of a polygon with 8 sides?",
+      options: ["Heptagon", "Octagon", "Nonagon", "Decagon"],
+      correct: 1
+    },
+    {
+      q: "A polygon with 5 sides is called a…",
+      options: ["Hexagon", "Pentagon", "Quadrilateral", "Heptagon"],
+      correct: 1
+    },
+    {
+      q: "How many sides does a nonagon have?",
+      options: ["7", "8", "9", "10"],
+      correct: 2
+    },
+    {
+      q: "What is another name for a 4-sided polygon?",
+      options: ["Triangle", "Pentagon", "Quadrilateral", "Hexagon"],
+      correct: 2
+    },
+    {
+      q: "A decagon has how many sides?",
+      options: ["8", "9", "10", "12"],
+      correct: 2
+    }
+  ];
+
+  let currentQ = 0;
+  let answered = false;
+
+  const quizQuestion = document.getElementById('quizQuestion');
+  const quizOptions = document.getElementById('quizOptions');
+  const feedback = document.getElementById('feedback');
+  const nextBtn = document.getElementById('nextBtn');
+
+  function loadQuestion() {
+    answered = false;
+    feedback.className = 'feedback';
+    nextBtn.classList.remove('show');
+
+    const q = questions[currentQ];
+    quizQuestion.textContent = `Question ${currentQ + 1} of ${questions.length}: ${q.q}`;
+    quizOptions.innerHTML = '';
+
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => selectAnswer(i));
+      quizOptions.appendChild(btn);
+    });
+  }
+
+  function selectAnswer(index) {
+    if (answered) return;
+    answered = true;
+
+    const q = questions[currentQ];
+    const buttons = quizOptions.querySelectorAll('.option-btn');
+
+    buttons.forEach((btn, i) => {
+      if (i === q.correct) btn.classList.add('correct');
+      else if (i === index) btn.classList.add('wrong');
+    });
+
+    if (index === q.correct) {
+      feedback.textContent = "Correct! Well done.";
+      feedback.className = 'feedback show success';
+    } else {
+      feedback.textContent = "Not quite. The correct answer is highlighted in green.";
+      feedback.className = 'feedback show error';
+    }
+
+    nextBtn.classList.add('show');
+  }
+
+  nextBtn.addEventListener('click', () => {
+    currentQ = (currentQ + 1) % questions.length;
+    loadQuestion();
+  });
+
+  loadQuestion();
+</script>
+</body>
+</html>
